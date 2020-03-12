@@ -1,3 +1,6 @@
+#ifndef H_FILESYSTEM_INTERFACE
+#define H_FILESYSTEM_INTERFACE
+
 #include <filesystem>
 #include <cstdint>
 #include <cassert>
@@ -18,3 +21,5 @@ const std::map<SizeUnit, std::string> SizeUnitNames = {
                                                  {SizeUnit::GB, "GB"},
                                                  {SizeUnit::TB, "TB"}
 };
+
+#endif
