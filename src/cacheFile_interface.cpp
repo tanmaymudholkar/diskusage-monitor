@@ -156,3 +156,9 @@ void cacheInfoClass::createGraphic(const char* outputGraphicFileName) {
   pieChart.Draw("T <");
   outputCanvas.SaveAs(outputGraphicFileName);
 }
+
+void cacheInfoClass::printTest() {
+  for (const std::string& objectToMonitor: objectsToMonitor_) {
+    std::cout << "At path: " << objectToMonitor << ", size: " << get_size(objectToMonitor.c_str()) << ", timestamp: " << get_last_modification_time(objectToMonitor.c_str()) << std::endl;
+  }
+}

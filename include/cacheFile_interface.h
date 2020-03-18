@@ -28,6 +28,7 @@ class cacheInfoClass {
   void updateCache();
   void writeToFile(const char*);
   void createGraphic(const char*);
+  void printTest();
  private:
   std::vector<std::string> objectsToMonitor_;
   std::map<std::string, unsigned long long int> sizesFromCache_;

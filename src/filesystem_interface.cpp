@@ -59,13 +59,14 @@ unsigned long long int get_last_modification_time(const char* p) {
   assert(std::filesystem::status_known(fstatus));
 
   // I really tried for hours to get the latest modification time through std::filesystem::last_write_time()
-  // but I couldn't find an easy way to convert "std::filesystem::file_time_type" to seconds since epoch
-  // using "count" and the various chrono casts with duration gave negative values...
-  // Here's the latest unsuccessful attempt: according to cppreference this may work in C++20
-  // if and when ROOT and gcc support it
+  // but I couldn't find an easy way to convert "std::filesystem::file_time_type" to seconds since epoch.
+  // Using "count" and the various chrono casts with duration gave negative values...
 
+  // Here's the latest unsuccessful attempt: according to cppreference this may work in C++20
+  // (if and when ROOT and gcc support it)
   // std::filesystem::file_time_type ftime = std::filesystem::last_write_time(p);
-  // std::time_t cftime = decltype(ftime)::clock::to_time_t(ftime);
+  // std::time_t cftime = std::chrono::system_clock::to_time_t(decltype(ftime)::clock::to_sys(ftime));
+  // return static_cast<unsigned long long int>(cftime);
 
   // Using unix stat for now...
   struct stat objInfo;

@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
   // run_tests(inputArguments, currentTime);
   cacheInfoClass cacheInfo(inputArguments.objectsToMonitor);
   cacheInfo.readObjectInfoFromFile(inputArguments.diskUsageCache);
+  // cacheInfo.printTest();
   cacheInfo.updateCache();
   cacheInfo.writeToFile(inputArguments.diskUsageCache);
   cacheInfo.createGraphic(inputArguments.outputGraphicFileName);
