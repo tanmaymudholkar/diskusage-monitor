@@ -23,6 +23,6 @@ int main(int argc, char* argv[]) {
   // cacheInfo.printTest();
   cacheInfo.updateCache();
   cacheInfo.writeToFile(inputArguments.diskUsageCache);
-  cacheInfo.createGraphic(inputArguments.outputGraphicFileName);
+  cacheInfo.saveCacheAsGraphic(inputArguments.outputGraphicFileName);
   return EXIT_SUCCESS;
 }

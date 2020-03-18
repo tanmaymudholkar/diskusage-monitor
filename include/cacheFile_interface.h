@@ -17,7 +17,8 @@
 #include "TTreeReaderValue.h"
 #include "TCanvas.h"
 #include "TAxis.h"
-#include "TPie.h"
+#include "TBox.h"
+#include "TText.h"
 
 #include "filesystem_interface.h"
 
@@ -27,7 +28,8 @@ class cacheInfoClass {
   void readObjectInfoFromFile(const char*);
   void updateCache();
   void writeToFile(const char*);
-  void createGraphic(const char*);
+  void saveImageToFile(const char*, const int&, const unsigned long long int&, const std::vector<unsigned long long int>&, const std::vector<int>&, const std::vector<std::string>&);
+  void saveCacheAsGraphic(const char*);
   void printTest();
  private:
   std::vector<std::string> objectsToMonitor_;

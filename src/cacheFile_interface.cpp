@@ -101,31 +101,46 @@ void cacheInfoClass::writeToFile(const char* cacheFilePath) {
   cacheFile->Close();
 }
 
-void cacheInfoClass::createGraphic(const char* outputGraphicFileName) {
-  TCanvas outputCanvas("outputCanvas", "outputCanvas", 1024, 768);
-  // TH1D sizesHistogram("sizes", ";backup object;size", objectsToMonitor_.size(), -0.5, -0.5 + objectsToMonitor_.size());
-  // for (int objectIndex = 0; objectIndex < static_cast<int>(objectsToMonitor_.size()); ++objectIndex) {
-  //   std::string objectToMonitor = objectsToMonitor_.at(objectIndex);
-  //   sizesHistogram.GetXaxis()->SetBinLabel(1+objectIndex, objectToMonitor.c_str());
-  //   sizesHistogram.SetBinContent(1+objectIndex, sizesUpdated_.at(objectToMonitor));
-  //   sizesHistogram.SetBinError(1+objectIndex, 0.);
-  // }
-  // sizesHistogram.Draw();
+void cacheInfoClass::saveImageToFile(const char* outputGraphicFileName, const int& nBoxesToDraw, const unsigned long long int& totalBudget, const std::vector<unsigned long long int>& diskUsageValues, const std::vector<int>& diskUsageColors, const std::vector<std::string>& diskUsageLabels) {
+  TCanvas outputCanvas("outputCanvas", "outputCanvas", 4096, 400);
+  TBox boxInterface;
+  TText textInterface;
+  textInterface.SetTextColor(kBlack);
+  textInterface.SetTextAlign(22);
+  textInterface.SetTextSize(0.1);
+  textInterface.SetTextAngle(30);
+  // first draw boxes
+  double runningLeftEdge;
+  runningLeftEdge = 0.;
+  for (int index = 0; index < nBoxesToDraw; ++index) {
+    double diskUsageFraction = (static_cast<double>(diskUsageValues.at(index))/static_cast<double>(totalBudget));
+    boxInterface.SetLineColor(kBlack);
+    boxInterface.SetFillColor(diskUsageColors.at(index));
+    boxInterface.DrawBox(runningLeftEdge, 0., runningLeftEdge + diskUsageFraction, 1.);
+    runningLeftEdge += diskUsageFraction;
+  }
+  // then draw labels
+  runningLeftEdge = 0.;
+  for (int index = 0; index < nBoxesToDraw; ++index) {
+    double diskUsageFraction = (static_cast<double>(diskUsageValues.at(index))/static_cast<double>(totalBudget));
+    textInterface.DrawTextNDC(runningLeftEdge + 0.5*diskUsageFraction, 0.5, diskUsageLabels.at(index).c_str());
+    runningLeftEdge += diskUsageFraction;
+  }
+  outputCanvas.SaveAs(outputGraphicFileName);
+}
+
+void cacheInfoClass::saveCacheAsGraphic(const char* outputGraphicFileName) {
   std::vector<int> colorsToUse{kBlue+2, kMagenta+2, kYellow+2, kGreen+2};
   unsigned long long int running_total_size = 0;
   for (const std::string& objectToMonitor: objectsToMonitor_) running_total_size += sizesUpdated_.at(objectToMonitor);
-  // unsigned long long int totalBudget = 100*std::pow(static_cast<unsigned long long int>(1000), 3); // 100 GB budget
-  unsigned long long int totalBudget = 10*std::pow(static_cast<unsigned long long int>(1000), 2); // 100 GB budget
+  unsigned long long int totalBudget = 100*std::pow(static_cast<unsigned long long int>(1000), 3); // 100 GB budget
+  // unsigned long long int totalBudget = 10*std::pow(static_cast<unsigned long long int>(1000), 2); // 10 MB budget
   unsigned long long int freeSpace = 0;
   if (totalBudget > running_total_size) freeSpace = totalBudget - running_total_size;
-  std::vector<double> diskUsageValues;
+  std::vector<unsigned long long int> diskUsageValues;
   std::vector<int> diskUsageColors;
   std::vector<std::string> diskUsageLabels;
-  diskUsageValues.push_back(freeSpace);
-  diskUsageColors.push_back(kGray+2);
-  diskUsageLabels.push_back("Available: " + std::string(get_human_readable_representation(freeSpace)));
-  double smallObjectsUsage = 0.;
-  std::string smallObjectsLabel = "Others: ";
+  unsigned long long int smallObjectsUsage = 0;
   unsigned int colorIndex = 0;
   for (const std::string& objectToMonitor: objectsToMonitor_) {
     unsigned long long int objectSize = sizesUpdated_.at(objectToMonitor);
@@ -137,24 +152,17 @@ void cacheInfoClass::createGraphic(const char* outputGraphicFileName) {
     }
     else {
       smallObjectsUsage += objectSize;
-      smallObjectsLabel += objectToMonitor + ", ";
     }
   }
-  smallObjectsLabel.pop_back();
-  smallObjectsLabel.pop_back();
   diskUsageValues.push_back(smallObjectsUsage);
   diskUsageColors.push_back(colorsToUse.at(colorIndex%(colorsToUse.size())));
-  diskUsageLabels.push_back(smallObjectsLabel);
+  diskUsageLabels.push_back("Others: " + std::string(get_human_readable_representation(smallObjectsUsage)));
+  diskUsageValues.push_back(freeSpace);
+  diskUsageColors.push_back(kGray+2);
+  diskUsageLabels.push_back("Available: " + std::string(get_human_readable_representation(freeSpace)));
   assert(diskUsageValues.size() == diskUsageColors.size());
   assert(diskUsageValues.size() == diskUsageLabels.size());
-
-  std::vector<const char*> diskUsageLabelsFormatted;
-  for (const std::string& diskUsageLabel: diskUsageLabels) diskUsageLabelsFormatted.push_back(diskUsageLabel.c_str());
-  TPie pieChart("backupBudget", "Backup Budget", diskUsageValues.size(), &diskUsageValues[0], &diskUsageColors[0], &diskUsageLabelsFormatted[0]);
-  pieChart.SetLabelFormat("#splitline{%txt}{(%perc)}");
-  pieChart.SetLabelsOffset(-0.05);
-  pieChart.Draw("T <");
-  outputCanvas.SaveAs(outputGraphicFileName);
+  saveImageToFile(outputGraphicFileName, static_cast<int>(diskUsageLabels.size()), totalBudget, diskUsageValues, diskUsageColors, diskUsageLabels);
 }
 
 void cacheInfoClass::printTest() {
