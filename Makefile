@@ -1,3 +1,8 @@
+CXX = g++
+ROOT_CFLAGS := $(shell root-config --cflags)
+ROOT_GLIBS := $(shell root-config --glibs)
+CXXFLAGS := -g $(ROOT_CFLAGS) -Wall -Wextra -Werror -pedantic-errors -fPIC -O3
+
 vpath %.a lib
 vpath %.so lib
 vpath %.o obj
@@ -7,17 +12,17 @@ vpath % bin
 
 all: run_monitor
 
-run_monitor: filesystem_interface.o ROOT_interface.o run_monitor.o
-	g++ -o bin/run_monitor obj/run_monitor.o obj/filesystem_interface.o obj/ROOT_interface.o `root-config --glibs`
+run_monitor: filesystem_interface.o cacheFile_interface.o run_monitor.o
+	$(CXX) -pthread -o bin/run_monitor obj/filesystem_interface.o obj/cacheFile_interface.o obj/run_monitor.o $(ROOT_GLIBS)
 
 filesystem_interface.o: filesystem_interface.h filesystem_interface.cpp
-	g++ -g -c -std=c++17 -Wall -Wextra -Werror -pedantic-errors -fPIC -O3 -o obj/filesystem_interface.o src/filesystem_interface.cpp
+	$(CXX) $(CXXFLAGS) -c -o obj/filesystem_interface.o src/filesystem_interface.cpp
 
-ROOT_interface.o: ROOT_interface.h ROOT_interface.cpp
-	g++ -g -c -std=c++17 -Wall -Wextra -Werror -pedantic-errors -fPIC -O3 -o obj/ROOT_interface.o src/ROOT_interface.cpp `root-config --cflags --glibs`
+cacheFile_interface.o: filesystem_interface.h cacheFile_interface.h cacheFile_interface.cpp
+	$(CXX) $(CXXFLAGS) -c -o obj/cacheFile_interface.o src/cacheFile_interface.cpp $(ROOT_GLIBS)
 
-run_monitor.o: run_monitor.cpp run_monitor.h
-	g++ -g -c -std=c++17 -Wall -Wextra -Werror -pedantic-errors -fPIC -O3 -o obj/run_monitor.o src/run_monitor.cpp
+run_monitor.o: filesystem_interface.h cacheFile_interface.h run_monitor.h run_monitor.cpp
+	$(CXX) $(CXXFLAGS) -c -o obj/run_monitor.o src/run_monitor.cpp
 
 clean:
 	rm -rf bin/*

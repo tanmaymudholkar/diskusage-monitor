@@ -2,16 +2,28 @@
 #define H_FILESYSTEM_INTERFACE
 
 #include <filesystem>
+#include <cstdlib>
+#include <iostream>
 #include <cstdint>
 #include <cassert>
 #include <string>
 #include <sstream>
 #include <map>
 #include <cmath>
+#include <ctime>
+#include <chrono>
 
-std::string get_human_readable_representation(const std::uintmax_t&);
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
-std::uintmax_t get_folder_size(const char*);
+std::string get_human_readable_representation(const unsigned long long int&);
+
+unsigned long long int get_folder_size(const char*);
+
+unsigned long long int get_size(const char*);
+
+unsigned long long int get_last_modification_time(const char*);
 
 enum class SizeUnit{B = 0, KB, MB, GB, TB};
 const std::map<SizeUnit, std::string> SizeUnitNames = {
